@@ -46,6 +46,7 @@ class CalculatorCommand extends Command {
         preg_match_all($regexp, $calculation, $calculationInputs);
 
         $startValue = 0;
+        $operation = array();
 
         if (is_numeric($calculationInputs[0][0])) {
             $startValue = array_shift($calculationInputs[0]);
@@ -58,35 +59,30 @@ class CalculatorCommand extends Command {
                 $operator = $calculationInput;
             }
 
-            /**
-             * @var $operation OperatorAbstract[]
-             */
-            $operation = [];
-
             if (isset($operand) && isset($operator)) {
                 switch ($operator) {
                     case '*':
-                        $operation[] = new Multiply($operand);
+                        $operation[0][] = new Multiply($operand);
                         unset($operand);
                         unset($operator);
                         break;
                     case '/':
-                        $operation[] = new Divide($operand);
+                        $operation[1][] = new Divide($operand);
                         unset($operand);
                         unset($operator);
                         break;
                     case '%':
-                        $operation[] = new Modulus($operand);
+                        $operation[2][] = new Modulus($operand);
                         unset($operand);
                         unset($operator);
                         break;
                     case '+':
-                        $operation[] = new Add($operand);
+                        $operation[3][] = new Add($operand);
                         unset($operand);
                         unset($operator);
                         break;
                     case '-':
-                        $operation[] = new Substract($operand);
+                        $operation[4][] = new Substract($operand);
                         unset($operand);
                         unset($operator);
                         break;
@@ -95,10 +91,16 @@ class CalculatorCommand extends Command {
                         break;
                 }
             }
+        }
+        ksort($operation);
 
-            foreach($operation as $executeable) {
-                $startValue = $executeable->setLeftOperand($startValue)
-                                          ->calculate();
+        foreach($operation as $key => $executeables) {
+            if (count($executeables)) {
+                foreach($executeables as $executeable) {
+                    $startValue = $executeable->setLeftOperand($startValue)
+                                              ->calculate();
+
+                }
             }
         }
 
